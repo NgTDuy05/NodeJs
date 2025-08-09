@@ -5,7 +5,7 @@
   "main": "serve.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node serve.js"
+    "start": "node ./src/server.js"
   },
   "repository": {
     "type": "git",
@@ -21,6 +21,8 @@
   },
   "homepage": "https://github.com/NgTDuy05/NodeJs#readme",
   "dependencies": {
+    "dotenv": "17.2.1",
+    "ejs": "3.1.10",
     "express": "5.1.0"
   }
 }
