@@ -4,8 +4,8 @@ const configViewEngine = require('./config/viewEngine');
 const webRoutes = require('./routes/web')
 
 const app = express()
-const port = process.env.PORT || 3001
-const hostname = process.env.HOST_NAME
+const port = process.env.PORT || 3000
+
 
 
 // console.log(">>> check env ", process.env);
@@ -14,8 +14,8 @@ const hostname = process.env.HOST_NAME
 // config template engine
 configViewEngine(app);
 
-app.use('/test', webRoutes);
+app.use('/', webRoutes);
 
-app.listen(port, hostname, () => {
+app.listen(3000, '0.0.0.0', () => {
     console.log(`Example app listening on port ${port}`)
 })
