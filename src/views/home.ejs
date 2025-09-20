@@ -1,0 +1,40 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home page</title>
+    <link rel="stylesheet" href="/css/home.css">
+</head>
+
+<body>
+    <ul>
+        <li><a href="default.asp">Home</a></li>
+        <li><a href="news.asp">News</a></li>
+        <li><a href="contact.asp">Contact</a></li>
+        <li><a href="about.asp">About</a></li>
+    </ul>
+    <div class="form">
+        <form action="/create-users" method="POST">
+            <fieldset>
+                <legend>Registration Form</legend>
+                <div class="input-group">
+                    <label>Email: </label>
+                    <input type="email" name="email" required>
+                </div> <br>
+                <div class="input-group">
+                    <label>Name: </label>
+                    <input type="text" name="name" required>
+                </div> <br>
+                <div class="input-group">
+                    <label>City: </label>
+                    <input type="text" name="city" required>
+                </div> <br>
+                <div><input type="submit" value="submit"></div>
+            </fieldset>
+
+        </form>
+    </div>
+</body>
+
+</html>
