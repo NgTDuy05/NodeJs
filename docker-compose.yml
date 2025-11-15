@@ -5,41 +5,13 @@ services:
     build: .
     container_name: nodejs-app
     restart: always
-    ports:
-      - "3000:3000"
     environment:
       - NODE_ENV=production
       - PORT=3000
       - HOST_NAME=0.0.0.0
-      - DB_HOST=mysql
+      - DB_HOST=localhost
       - DB_PORT=3306
       - DB_USER=nodeuser
       - DB_PASSWORD=Ntd05#12
       - DB_NAME=nodejs_db
-    depends_on:
-      - mysql
-    networks:
-      - app-network
-
-  mysql:
-    image: mysql:8.0
-    container_name: nodejs-mysql
-    restart: always
-    environment:
-      - MYSQL_ROOT_PASSWORD=rootpassword
-      - MYSQL_DATABASE=nodejs_db
-      - MYSQL_USER=nodeuser
-      - MYSQL_PASSWORD=Ntd05#12
-    ports:
-      - "3307:3306"
-    volumes:
-      - mysql-data:/var/lib/mysql
-    networks:
-      - app-network
-
-networks:
-  app-network:
-    driver: bridge
-
-volumes:
-  mysql-data:
+    network_mode: host 
