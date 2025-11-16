@@ -5,7 +5,7 @@ services:
     build: .
     container_name: nodejs-app
     restart: always
-    networks_mode: host
+    network_mode: host
     environment:
       - NODE_ENV=production
       - PORT=3000
