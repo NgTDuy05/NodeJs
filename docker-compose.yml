@@ -1,6 +1,71 @@
 version: '3.8'
 
 services:
+  #MySQL Databse
+  mysql:
+    image: mysql:8.0
+    container_name: nodejs-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: sp#$g2Y#264Xy6n
+      MYSQL_DATABASE: nodejs_db
+      MYSQL_USER: nodeuser
+      MYSQL_PASSWORD: Ntd05#12
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "3306:3306"
+    networks:
+      - app-network
+    command: --default-authentication-plugin=mysql_native_password --max_connections=1000
+
+  #Redis cache
+  redis:
+    image: redis:7-alpine
+    container_name: nodejs-redis
+    restart: always
+    command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - app-network
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  # Elasticsearch
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: nodejs-elasticsearch
+    restart: always
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      - bootstrap.memory_lock=true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    networks:
+      - app-network
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Node.js App
   app:
     build: .
     container_name: nodejs-app
@@ -8,10 +73,65 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
-      - HOST_NAME=0.0.0.0
-      - DB_HOST=localhost
+      - DB_HOST=mysql
       - DB_PORT=3306
       - DB_USER=nodeuser
       - DB_PASSWORD=Ntd05#12
       - DB_NAME=nodejs_db
-    network_mode: host
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - ES_HOST=elasticsearch
+      - ES_PORT=9200
+    depends_on:
+      mysql:
+        condition: service_started
+      redis:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - app-network
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./src:/app/src
+      - /app/node_modules
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3000/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Nginx Load Balancer
+  nginx:
+    image: nginx:alpine
+    container_name: nodejs-nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - /var/cache/nginx:/var/cache/nginx
+    depends_on:
+      - app
+    networks:
+      - app-network
+    healthcheck:
+      test: [ "CMD", "nginx", "-t" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+  es_data:
+    driver: local
