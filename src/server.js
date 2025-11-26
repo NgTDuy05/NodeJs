@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const configViewEngine = require('./config/viewEngine');
-const webRoutes = require('./routes/web');
+//const webRoutes = require('./routes/web');
 const apiRoutes = require('./routes/api');
 
 const app = express();
@@ -15,7 +15,7 @@ app.use(express.urlencoded({ extended: true }));
 configViewEngine(app);
 
 // Routes
-app.use('/', webRoutes);
+//app.use('/', webRoutes);
 app.use('/api', apiRoutes);
 
 // 404 handler

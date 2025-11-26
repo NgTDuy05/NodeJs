@@ -1,55 +1,58 @@
+const mysql = require('mysql2/promise');
 
-const connection = require('../config/database');
+// Tạo connection trực tiếp thay vì dùng pool
+const getConnection = async () => {
+    return await mysql.createConnection({
+        host: '127.0.0.1',
+        port: 3306,
+        user: 'nodeuser',
+        password: 'Ntd05#12',
+        database: 'nodejs_db'
+    });
+};
 
-const getAllUsers = async () => {
-    let [users] = await connection.execute('SELECT * FROM Users');
-    return users;
-}
+let getAllUsers = async () => {
+    const connection = await getConnection();
+    const [results] = await connection.query('SELECT * FROM Users');
+    await connection.end();
+    return results;
+};
 
-const createUser = async (email, name, city) => {
-    await connection.execute(
-        'INSERT INTO Users(email, name, city) VALUES(?, ?, ?)',
+let createNewUser = async (email, name, city) => {
+    const connection = await getConnection();
+    await connection.query(
+        'INSERT INTO Users(email, name, city) VALUES (?, ?, ?)',
         [email, name, city]
     );
-}
+    await connection.end();
+};
 
-const isEmailExists = async (email, excludeID) => {
-    let query = 'SELECT COUNT(*) as count FROM Users WHERE email = ?';
-    let params = [email];
-    if (excludeID) {
-        query += ' AND id != ?';
-        params.push(excludeID);
-    }
-    const [results] = await connection.execute(query, params);
-    return results[0].count > 0;
-}
+let getUserById = async (userId) => {
+    const connection = await getConnection();
+    const [users] = await connection.query('SELECT * FROM Users WHERE id = ?', [userId]);
+    await connection.end();
+    return users[0];
+};
 
-const getUserById = async (id) => {
-    const [user] = await connection.execute(
-        'SELECT * FROM Users WHERE id = ?',
-        [id]
-    );
-    return user[0];
-}
-
-const updateUser = async (id, email, name, city) => {
-    await connection.execute(
+let updateUserById = async (email, name, city, userId) => {
+    const connection = await getConnection();
+    await connection.query(
         'UPDATE Users SET email = ?, name = ?, city = ? WHERE id = ?',
-        [email, name, city, id]
+        [email, name, city, userId]
     );
-}
+    await connection.end();
+};
 
-const deleteUser = async (id) => {
-    await connection.execute(
-        'DELETE FROM Users WHERE id = ?',
-        [id]
-    );
-}
+let deleteUserById = async (id) => {
+    const connection = await getConnection();
+    await connection.query('DELETE FROM Users WHERE id = ?', [id]);
+    await connection.end();
+};
+
 module.exports = {
     getAllUsers,
-    createUser,
-    isEmailExists,
+    createNewUser,
     getUserById,
-    updateUser,
-    deleteUser
-}
+    updateUserById,
+    deleteUserById
+};
